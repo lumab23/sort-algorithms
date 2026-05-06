@@ -1,4 +1,6 @@
-package br.com.concorrencia.sort;
+package br.com.concorrencia.sort.serial;
+
+import br.com.concorrencia.sort.SortAlgorithm;
 
 public class BubbleSort implements SortAlgorithm {
     @Override

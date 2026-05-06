@@ -2,13 +2,13 @@ package br.com.concorrencia.benchmark;
 
 import br.com.concorrencia.data.DataGenerator;
 import br.com.concorrencia.data.InputType;
-import br.com.concorrencia.sort.BubbleSort;
-import br.com.concorrencia.sort.InsertionSort;
-import br.com.concorrencia.sort.MergeSort;
-import br.com.concorrencia.sort.ParallelMergeSort;
-import br.com.concorrencia.sort.ParallelQuickSort;
-import br.com.concorrencia.sort.QuickSort;
 import br.com.concorrencia.sort.SortAlgorithm;
+import br.com.concorrencia.sort.paralelo.ParallelMergeSort;
+import br.com.concorrencia.sort.paralelo.ParallelQuickSort;
+import br.com.concorrencia.sort.serial.BubbleSort;
+import br.com.concorrencia.sort.serial.InsertionSort;
+import br.com.concorrencia.sort.serial.MergeSort;
+import br.com.concorrencia.sort.serial.QuickSort;
 import br.com.concorrencia.stats.BenchmarkSummary;
 import br.com.concorrencia.stats.Statistics;
 

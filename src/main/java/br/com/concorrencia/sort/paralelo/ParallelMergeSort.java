@@ -1,4 +1,6 @@
-package br.com.concorrencia.sort;
+package br.com.concorrencia.sort.paralelo;
+
+import br.com.concorrencia.sort.SortAlgorithm;
 
 import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;

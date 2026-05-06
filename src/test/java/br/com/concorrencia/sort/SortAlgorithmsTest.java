@@ -1,6 +1,8 @@
 package br.com.concorrencia.sort;
 
 import org.junit.jupiter.api.Test;
+import br.com.concorrencia.sort.paralelo.ParallelMergeSort;
+import br.com.concorrencia.sort.paralelo.ParallelQuickSort;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +10,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import br.com.concorrencia.sort.serial.BubbleSort;
+import br.com.concorrencia.sort.serial.InsertionSort;
+import br.com.concorrencia.sort.serial.MergeSort;
+import br.com.concorrencia.sort.serial.QuickSort;
 
 class SortAlgorithmsTest {
     @Test
