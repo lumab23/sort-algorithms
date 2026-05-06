@@ -234,7 +234,7 @@ public class BenchmarkMainGui extends JFrame {
             @Override
             protected BenchmarkRunner.BenchmarkOutput doInBackground() throws Exception {
                 PrintStream originalOut = System.out;
-                PrintStream logStream = criarLogStream(originalOut, this::publish);
+                PrintStream logStream = criarLogStream(originalOut, linha -> publish(linha));
                 try {
                     System.setOut(logStream);
                     DataGenerator gerador = new DataGenerator(42L);
