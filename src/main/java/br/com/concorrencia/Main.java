@@ -4,6 +4,7 @@ import br.com.concorrencia.benchmark.BenchmarkRunner;
 import br.com.concorrencia.benchmark.CsvWriter;
 import br.com.concorrencia.data.DataGenerator;
 import br.com.concorrencia.data.InputType;
+import br.com.concorrencia.gui.BenchmarkMainGui;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -12,6 +13,25 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        if (args == null || args.length == 0 || isGuiMode(args)) {
+            BenchmarkMainGui.abrir();
+            return;
+        }
+
+        executarBenchmarkCli();
+    }
+
+    private static boolean isGuiMode(String[] args) {
+        if (args == null) {
+            return false;
+        }
+        return Arrays.stream(args)
+                .filter(arg -> arg != null)
+                .map(String::trim)
+                .anyMatch(arg -> "--gui".equalsIgnoreCase(arg) || "gui".equalsIgnoreCase(arg));
+    }
+
+    private static void executarBenchmarkCli() throws IOException {
         List<Integer> arraySizes = Arrays.asList(1_000, 5_000, 10_000, 50_000, 100_000);
         List<InputType> inputTypes = Arrays.asList(
                 InputType.RANDOM,

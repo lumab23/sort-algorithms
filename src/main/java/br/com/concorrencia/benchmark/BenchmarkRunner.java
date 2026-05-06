@@ -3,6 +3,8 @@ package br.com.concorrencia.benchmark;
 import br.com.concorrencia.data.DataGenerator;
 import br.com.concorrencia.data.InputType;
 import br.com.concorrencia.sort.SortAlgorithm;
+import br.com.concorrencia.sort.paralelo.ParallelBubbleSort;
+import br.com.concorrencia.sort.paralelo.ParallelInsertionSort;
 import br.com.concorrencia.sort.paralelo.ParallelMergeSort;
 import br.com.concorrencia.sort.paralelo.ParallelQuickSort;
 import br.com.concorrencia.sort.serial.BubbleSort;
@@ -13,6 +15,7 @@ import br.com.concorrencia.stats.BenchmarkSummary;
 import br.com.concorrencia.stats.Statistics;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,8 +39,18 @@ public class BenchmarkRunner {
     }
 
     public BenchmarkOutput runBenchmarks(List<Integer> arraySizes, List<InputType> inputTypes, List<Integer> threadOptions) {
+        return runBenchmarks(arraySizes, inputTypes, threadOptions, null);
+    }
+
+    public BenchmarkOutput runBenchmarks(
+            List<Integer> arraySizes,
+            List<InputType> inputTypes,
+            List<Integer> threadOptions,
+            Set<String> algoritmosSelecionados
+    ) {
         List<BenchmarkResult> rawResults = new ArrayList<>();
         Set<Integer> normalizedThreads = normalizeThreads(threadOptions);
+        Set<String> filtroAlgoritmos = normalizeAlgorithmFilter(algoritmosSelecionados);
         int totalCombinations = inputTypes.size() * arraySizes.size();
         int combinationIndex = 0;
         long benchmarkStart = System.nanoTime();
@@ -51,8 +64,8 @@ public class BenchmarkRunner {
                 printCombinationHeader(combinationIndex, totalCombinations, inputType, size);
                 int[] baseArray = dataGenerator.generate(size, inputType);
 
-                runSequentialBenchmarks(rawResults, baseArray, inputType, size);
-                runParallelBenchmarks(rawResults, baseArray, inputType, size, normalizedThreads);
+                runSequentialBenchmarks(rawResults, baseArray, inputType, size, filtroAlgoritmos);
+                runParallelBenchmarks(rawResults, baseArray, inputType, size, normalizedThreads, filtroAlgoritmos);
 
                 double elapsedSeconds = (System.nanoTime() - combinationStart) / 1_000_000_000.0;
                 System.out.printf("[END ] Entrada %d/%d concluida em %.2fs%n", combinationIndex, totalCombinations, elapsedSeconds);
@@ -65,7 +78,13 @@ public class BenchmarkRunner {
         return new BenchmarkOutput(rawResults, summaries);
     }
 
-    private void runSequentialBenchmarks(List<BenchmarkResult> rawResults, int[] baseArray, InputType inputType, int size) {
+    private void runSequentialBenchmarks(
+            List<BenchmarkResult> rawResults,
+            int[] baseArray,
+            InputType inputType,
+            int size,
+            Set<String> filtroAlgoritmos
+    ) {
         List<SortAlgorithm> algorithms = List.of(
                 new BubbleSort(),
                 new InsertionSort(),
@@ -74,6 +93,9 @@ public class BenchmarkRunner {
         );
 
         for (SortAlgorithm algorithm : algorithms) {
+            if (!shouldRun(algorithm.getName(), filtroAlgoritmos)) {
+                continue;
+            }
             if (isQuadraticAlgorithm(algorithm.getName()) && size > maxQuadraticSize) {
                 System.out.printf("[SKIP] %-18s | modo=%-10s | tipo=%-13s | tamanho=%7d | limite=%d%n",
                         algorithm.getName(), modeOf(algorithm), inputType, size, maxQuadraticSize);
@@ -112,14 +134,30 @@ public class BenchmarkRunner {
             int[] baseArray,
             InputType inputType,
             int size,
-            Set<Integer> threadOptions
+            Set<Integer> threadOptions,
+            Set<String> filtroAlgoritmos
     ) {
         for (Integer threads : threadOptions) {
             try (ParallelMergeSort parallelMergeSort = new ParallelMergeSort(threads);
-                 ParallelQuickSort parallelQuickSort = new ParallelQuickSort(threads)) {
-                List<SortAlgorithm> algorithms = List.of(parallelMergeSort, parallelQuickSort);
+                 ParallelQuickSort parallelQuickSort = new ParallelQuickSort(threads);
+                 ParallelBubbleSort parallelBubbleSort = new ParallelBubbleSort(threads);
+                 ParallelInsertionSort parallelInsertionSort = new ParallelInsertionSort(threads)) {
+                List<SortAlgorithm> algorithms = List.of(
+                        parallelMergeSort,
+                        parallelQuickSort,
+                        parallelBubbleSort,
+                        parallelInsertionSort
+                );
 
                 for (SortAlgorithm algorithm : algorithms) {
+                    if (!shouldRun(algorithm.getName(), filtroAlgoritmos)) {
+                        continue;
+                    }
+                    if (isQuadraticAlgorithm(algorithm.getName()) && size > maxQuadraticSize) {
+                        System.out.printf("[SKIP] %-18s | modo=%-10s | tipo=%-13s | tamanho=%7d | limite=%d%n",
+                                algorithm.getName(), modeOf(algorithm), inputType, size, maxQuadraticSize);
+                        continue;
+                    }
                     warmup(algorithm, baseArray);
                     double totalMs = 0.0;
                     for (int sample = 1; sample <= samples; sample++) {
@@ -263,7 +301,10 @@ public class BenchmarkRunner {
     }
 
     private static boolean isQuadraticAlgorithm(String algorithmName) {
-        return "BubbleSort".equals(algorithmName) || "InsertionSort".equals(algorithmName);
+        return "BubbleSort".equals(algorithmName)
+                || "InsertionSort".equals(algorithmName)
+                || "ParallelBubbleSort".equals(algorithmName)
+                || "ParallelInsertionSort".equals(algorithmName);
     }
 
     private static String sequentialCounterpartName(String algorithmName) {
@@ -272,6 +313,12 @@ public class BenchmarkRunner {
         }
         if ("ParallelQuickSort".equals(algorithmName)) {
             return "QuickSort";
+        }
+        if ("ParallelBubbleSort".equals(algorithmName)) {
+            return "BubbleSort";
+        }
+        if ("ParallelInsertionSort".equals(algorithmName)) {
+            return "InsertionSort";
         }
         return algorithmName;
     }
@@ -305,6 +352,23 @@ public class BenchmarkRunner {
             normalized.add(1);
         }
         return normalized;
+    }
+
+    private static Set<String> normalizeAlgorithmFilter(Set<String> algoritmosSelecionados) {
+        if (algoritmosSelecionados == null || algoritmosSelecionados.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> filtro = new HashSet<>();
+        for (String algoritmo : algoritmosSelecionados) {
+            if (algoritmo != null && !algoritmo.isBlank()) {
+                filtro.add(algoritmo.trim());
+            }
+        }
+        return filtro;
+    }
+
+    private static boolean shouldRun(String algorithmName, Set<String> filtroAlgoritmos) {
+        return filtroAlgoritmos.isEmpty() || filtroAlgoritmos.contains(algorithmName);
     }
 
     private record SummaryKey(String algorithm, String mode, InputType inputType, int arraySize, int threads) {

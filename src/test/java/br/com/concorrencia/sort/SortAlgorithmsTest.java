@@ -3,6 +3,8 @@ package br.com.concorrencia.sort;
 import org.junit.jupiter.api.Test;
 import br.com.concorrencia.sort.paralelo.ParallelMergeSort;
 import br.com.concorrencia.sort.paralelo.ParallelQuickSort;
+import br.com.concorrencia.sort.paralelo.ParallelBubbleSort;
+import br.com.concorrencia.sort.paralelo.ParallelInsertionSort;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,8 @@ class SortAlgorithmsTest {
                 InsertionSort::new,
                 MergeSort::new,
                 QuickSort::new,
+                () -> new ParallelBubbleSort(4),
+                () -> new ParallelInsertionSort(4),
                 () -> new ParallelMergeSort(4),
                 () -> new ParallelQuickSort(4)
         );
