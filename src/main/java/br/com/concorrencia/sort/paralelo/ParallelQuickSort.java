@@ -74,7 +74,6 @@ public class ParallelQuickSort implements SortAlgorithm, AutoCloseable {
             }
 
             if (high - low <= threshold) {
-                // Arrays.sort is used only for small chunks to reduce ForkJoin overhead.
                 Arrays.sort(array, low, high + 1);
                 return;
             }
