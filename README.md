@@ -338,17 +338,3 @@ Na execução completa utilizada no artigo, foram gerados:
 * Em alguns cenários, a versão paralela pode ser mais lenta que a sequencial por causa do overhead de criação e sincronização de tarefas.
 * Resultados de benchmark podem variar entre execuções devido à carga da máquina, frequência da CPU, garbage collection e outros processos do sistema operacional.
 * A interface gráfica é voltada para visualização e execução manual; a execução completa mais abrangente é feita via terminal.
-
-## Possíveis melhorias futuras
-
-* Adicionar novos algoritmos, como Counting Sort e Selection Sort.
-* Permitir comparação direta entre arquivos CSV antigos e novos.
-* Melhorar os gráficos da interface.
-* Adicionar filtros por algoritmo, tipo de entrada e número de threads.
-* Exportar gráficos automaticamente como imagem.
-* Adicionar suporte a datasets externos.
-
-## Autoras
-
-* Amanda Fonseca
-* Luma Brandão
